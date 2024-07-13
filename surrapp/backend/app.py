@@ -11,10 +11,6 @@ CORS(app)
 #computing device
 device = torch.device("cpu")
 
-#path to ssl certificates
-cert = "keys/server.crt"
-key = "keys/server.key"
-
 #loading model 
 model = ChordNN(level1_classes=12, level2_classes=4, level3_classes=4)
 model.load_state_dict(torch.load("models/chord_cnn.pth", map_location=device))
@@ -28,16 +24,11 @@ def hello():
     print("Flask app started")
     return("Flask app started")
 
-@app.route('/api/chunks')
+@app.route('/api/chunks', methods=['POST'])
 def handle_chunks(data):
     print(f"Audio chunks recieved: {data}")
-
-
-# #endpoint to revieve audio chunks
-# @app.route('/api/chunks', methods=['POST'])
-# def recieve_chunks():
-#     chunk = request.data
-#     return jsonify({'status': 'success', 'message':'audio chunk recieved'}), 200
+    #comvert audio chunks into chroma stft
+    #feed into model to get output
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, ssl_context=(cert, key), debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)

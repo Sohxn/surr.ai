@@ -4,6 +4,7 @@ import { Text, View , Button, StyleSheet , TouchableOpacity } from 'react-native
 import {styled} from 'nativewind'
 import PagerView from 'react-native-pager-view';
 import {Buffer} from 'buffer'
+import Bar from './components/Bar'
 
 import {PermissionsAndroid, Platform} from 'react-native';
 // fonts
@@ -24,6 +25,38 @@ SplashScreen.preventAutoHideAsync();
 
 
 export default function App() {
+  const [isStreaming, SetIsStreaming] = useState(false)
+  const [seconds, setSeconds] = useState(0)
+  const [root, setRoot] = useState('~')
+  const [qual, setQual] = useState('.')
+  const [mod, setMod] = useState('~')
+  // const [bars, setBars] = useState([])
+  const intervalid = useRef(null)
+
+  // update time seconds variable
+  useEffect(() => {
+    
+    // Update seconds only when isStreaming is true
+    if (isStreaming) {
+      intervalid.current = setInterval(() => {
+        setSeconds((prevSeconds) => prevSeconds + 1);
+      }, 1000); // Update every second
+    }else{
+      clearInterval(intervalid.current)
+      setRoot('~')
+      setQual('.')
+      setMod('~')
+    }
+
+    // Cleanup function to clear the interval when necessary
+    return () => clearInterval(intervalid.current);
+  }, [isStreaming]);  
+
+  const formatTimeDisplay = (seconds) => {
+    const min = String(Math.floor(seconds / 60 )).padStart(2, '0')
+    const sec = String(seconds % 60).padStart(2, '0')
+    return `${min} : ${sec}`
+  }
  
 
   const initialiseAudio = async () => {
@@ -33,8 +66,8 @@ export default function App() {
       sampleRate: 44100,  
       channels: 1,        
       bitsPerSample: 16,  
-      audioSource: 9,     // android only (see below)
-      bufferSize: 4096    
+      audioSource: 9,     // mic input
+      bufferSize: 88100
     })
   } 
 
@@ -71,7 +104,7 @@ export default function App() {
 
 
 
-const [isStreaming, SetIsStreaming] = useState(false)
+
 
 
 const [isLoaded] = useFonts(
@@ -106,12 +139,22 @@ const handleAudioStream = () => {
     LiveAudioStream.on('data', async (data) => {
       const chunk = Buffer.from(data, 'base64')
       try {
-        await axios.post('https://192.168.31.194:5000/api/chunks', chunk, {
+        const response = await axios.post('http://13.234.233.95:8080/api/chunks', chunk, {
           headers: {
-            'Content-Type': 'application/octet-stream',
+            'Content-Type': 'audio/pcm',
           },
         });
-        console.log('Chunk sent to backend');
+        console.log(response.data)
+        if(response.data["root"] === "" && response.data["quality"] === "" && response.data["modifier"] === ""){
+          setRoot("~")
+          setQual(".")
+          setMod("~")
+        }else{
+          setRoot(response.data["root"])
+          setQual(response.data["quality"])
+          setMod(response.data["modifier"])
+          // updateBars(response.data["rms"])
+        }
       } catch (error) {
         console.error('Error sending chunk to backend:', error);
       }
@@ -119,8 +162,16 @@ const handleAudioStream = () => {
     LiveAudioStream.start()
   }
   SetIsStreaming(!isStreaming)
+  setSeconds(0)
 }
 
+// const updateBars = (rms) => {
+//   const color = rms > 50 ? '#8492a6' : '#ff7849'
+//   setBars((prevBars) => [...prevBars, { height: rms, color}])
+//   if(bars.length > 10){
+//     setBars((prevBars) => prevBars.slice(1))
+//   }
+// }
 
   // FRONT END
   return (
@@ -133,16 +184,23 @@ const handleAudioStream = () => {
         grid grid-rows-2'>
             {/* info display area */}
             <StyledView className='flex justify-center items-center h-[50vh]'>
-                  <Text style={{fontFamily: "oswald"}} className='text-[9vh]'>chord</Text>
+                  <Text style={{fontFamily: "oswald"}} className='text-[8vh]'>{root} {qual} {mod}</Text>
             </StyledView>
 
             <StyledView className='flex justify-center items-center h-20 mt-5'>
                 <StyledView className='w-fit bg-orange-ui rounded-[30px]'>
-                      <Text style={{fontFamily: "anton"}} className='text-xl p-3 text-white'>00 : 10 </Text>
+                      <Text style={{fontFamily: "anton"}} className='text-xl p-3 text-white'>{formatTimeDisplay(seconds)}</Text>
                 </StyledView>
             </StyledView>
 
         </StyledView>
+
+
+        {/* <StyledView className='h-[10vh] w-[97vw] rounded-2xl mt-[15vh]'>
+        {bars.map((bar, index) => (
+              <Bar key={index} height={bar.height} color={bar.color} />
+        ))}
+        </StyledView> */}
 
         
 
