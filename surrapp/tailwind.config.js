@@ -14,13 +14,14 @@ module.exports = {
       'gray': '#8492a6',
       'gray-light': '#d3dce6',
       'orange-ui': '#ff5800',
-      'white': '#ffffff', 
+      'white': '#ffffff',
       'black': '#000000',
     },
 
     fontFamily: {
-      'anton' : ['Anton']
+      'anton': ['Anton'],
+      'roboto': ['Roboto-Medium']
     },
-  plugins: [],
-}
+    plugins: [],
+  }
 }
