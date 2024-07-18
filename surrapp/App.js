@@ -163,9 +163,9 @@ export default function App() {
   }
 
   const updateBars = (rms) => {
-    const color = rms > 50 ? '#8492a6' : '#ff7849'
+    const color = rms > 45.0 ? 'white' : 'orange-ui'
     setBars((prevBars) => [...prevBars, { height: rms, color }])
-    if (bars.length > 10) {
+    if (bars.length > 50) {
       setBars((prevBars) => prevBars.slice(1))
     }
   }
@@ -196,7 +196,7 @@ export default function App() {
         </StyledView>
 
 
-        <StyledView className='h-[10vh] w-[97vw] rounded-2xl mt-[15vh]'>
+        <StyledView className='h-[10vh] w-[97vw] rounded-2xl border-2 border-white mt-[15vh]'>
           {bars.map((bar, index) => (
             <Bar key={index} height={bar.height} color={bar.color} />
           ))}
