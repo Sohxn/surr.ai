@@ -4,8 +4,6 @@ import { Text, View, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { styled } from 'nativewind'
 import PagerView from 'react-native-pager-view';
 import { Buffer } from 'buffer'
-import Bar from './components/Bar'
-
 import { PermissionsAndroid, Platform } from 'react-native';
 // fonts
 import { useFonts } from 'expo-font';
@@ -22,6 +20,14 @@ const StyledPagerView = styled(PagerView)
 // preventing splashscreen from auto-hide
 SplashScreen.preventAutoHideAsync();
 
+const Bar = ({ height, color }) => {
+  return (
+    <StyledView
+      className={`w-[10px] m-[1px] rounded-full mr-2`}
+      style={{ height: height, backgroundColor: color }}
+    />
+  );
+};
 
 
 export default function App() {
@@ -31,7 +37,6 @@ export default function App() {
   const [qual, setQual] = useState('.')
   const [mod, setMod] = useState('~')
   const [bars, setBars] = useState([])
-  const [rms, setRMS] = useState(null)
   const intervalid = useRef(null)
 
   // update time seconds variable
@@ -48,9 +53,10 @@ export default function App() {
       setQual('.')
       setMod('~')
     }
-
+    setBars([])
     // Cleanup function to clear the interval when necessary
     return () => clearInterval(intervalid.current);
+
   }, [isStreaming]);
 
   const formatTimeDisplay = (seconds) => {
@@ -140,17 +146,18 @@ export default function App() {
               'Content-Type': 'audio/pcm',
             },
           });
-          console.log(response.data)
+          // update rms and bars array
+          updateBars(response.data["rms"])
+
+
           if (response.data["root"] === "" && response.data["quality"] === "" && response.data["modifier"] === "") {
             setRoot("~")
             setQual(".")
             setMod("~")
           } else {
-            setRMS(response.data["rms"])
             setRoot(response.data["root"])
             setQual(response.data["quality"])
             setMod(response.data["modifier"])
-            updateBars(rms)
           }
         } catch (error) {
           console.error('Error sending chunk to backend:', error);
@@ -162,11 +169,11 @@ export default function App() {
     setSeconds(0)
   }
 
-  const updateBars = (rms) => {
-    const color = rms > 45.0 ? 'white' : 'orange-ui'
-    setBars((prevBars) => [...prevBars, { height: rms, color }])
+  const updateBars = (rmsVal) => {
+    const color = rmsVal > 40.0 ? '#ff5800' : '#ffffff'
+    setBars((prevBars) => [...prevBars, { height: rmsVal, color }])
     if (bars.length > 50) {
-      setBars((prevBars) => prevBars.slice(1))
+      bars.shift()
     }
   }
 
@@ -196,10 +203,12 @@ export default function App() {
         </StyledView>
 
 
-        <StyledView className='h-[10vh] w-[97vw] rounded-2xl border-2 border-white mt-[15vh]'>
-          {bars.map((bar, index) => (
-            <Bar key={index} height={bar.height} color={bar.color} />
-          ))}
+        <StyledView className='h-[10vh] w-[97vw] rounded-2xl mt-[15vh]'>
+          <StyledView className='flex-row items-center'>
+            {bars.map((bar, index) => (
+              <Bar key={index} height={bar.height} color={bar.color} />
+            ))}
+          </StyledView>
         </StyledView>
 
 
