@@ -21,9 +21,11 @@ const StyledPagerView = styled(PagerView)
 SplashScreen.preventAutoHideAsync();
 
 const Bar = ({ height, color }) => {
+  //height normalisation
+
   return (
     <StyledView
-      className={`w-[5px] m-[1px] rounded-full mr-2`} 
+      className={`w-[7px] rounded-full mr-1`} 
       style={{ height: height, backgroundColor: color }}
     />
   );
@@ -74,9 +76,13 @@ export default function App() {
       channels: 1,
       bitsPerSample: 16,
       audioSource: 9,     // mic input
-      bufferSize: 512
+      bufferSize: 22500,
     })
   }
+
+  //sample rate = buffer size / time
+  // time  = buffer / sample rate = 22050 / 44100 = 0.5s
+  //one sample every 0.5 seconds so its fast as fuck
 
   const requestMicrophone = async () => {
     if (Platform.OS === 'android') {
@@ -108,7 +114,7 @@ export default function App() {
     }
   }
 
-
+  //functions to load fonts on component mount 
   const [isLoaded] = useFonts(
     {
       "roboto": require("./assets/fonts/Roboto-Medium.ttf"),
@@ -169,8 +175,9 @@ export default function App() {
     setSeconds(0)
   }
 
+  //function to render sound viualisation
   const updateBars = (rmsVal) => {
-    const color = rmsVal > 40.0 ? '#ff5800' : '#ffffff'
+    const color = rmsVal > 40.0 ? '#ff5800' : '#ff5800'
     setBars((prevBars) => [...prevBars, { height: rmsVal, color }])
     if (bars.length > 50) {
       bars.shift()
@@ -190,8 +197,17 @@ export default function App() {
             <Text style={{ fontFamily: "roboto" }} className='text-orange-ui text-[3vh]'>surr.ai </Text>
           </StyledView>
           {/* info display area */}
-          <StyledView className='flex justify-center items-center h-[50vh]'>
+          <StyledView className='flex justify-center items-center mt-[15vh] h-[20vh]'>
             <Text style={{ fontFamily: "oswald" }} className='text-[8vh]'>{root} {qual} {mod}</Text>
+          </StyledView>
+
+            {/* sound visualisation */}
+          <StyledView className='flex mt-[11vh] h-[5vh] w-fill rounded-full overflow-hidden border-black'>
+            <StyledView className='flex-row items-center justify-end flex-row-reverse overflow-hidden'>
+              {bars.map((bar, index) => (
+                <Bar key={index} height={bar.height} color={bar.color} />
+              ))}
+            </StyledView>
           </StyledView>
 
           <StyledView className='flex justify-center items-center h-20 mt-5'>
@@ -201,17 +217,7 @@ export default function App() {
           </StyledView>
 
         </StyledView>
-
-
-        <StyledView className='h-[40vh] w-[97vw] rounded-2xl mt-[15vh] border-2'>
-          <StyledView className='flex-row items-center flex-row-reverse'>
-            {bars.map((bar, index) => (
-              <Bar key={index} height={bar.height} color={bar.color} />
-            ))}
-          </StyledView>
-        </StyledView>
-
-
+      
 
         <StyledButton style={styles.shadowProp}
           onPress={handleAudioStream}
@@ -226,7 +232,7 @@ export default function App() {
       </StyledView>
 
       {/* PAGE 2 */}
-      <StyledView key="2" className="flex-[1] bg-white h-screen w-screen bg-black">
+      <StyledView key="2" className="flex-[1] bg-white h-screen w-screen bg-black rounded-full">
         <StyledView className='flex items-center grid grid-rows-2 h-screen w-screen bg-white'>
           <StyledView className='flex row h-[20vh] items-left justify-center w-screen bg-white'>
             <Text style={{ fontFamily: "anton" }}

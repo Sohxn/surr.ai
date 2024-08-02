@@ -1,0 +1,5 @@
+username: ubuntu
+public ip: 13.234.233.95
+
+//shell command:
+$ ssh -i <key-pair_filename>.pem <username>@<publicip>
