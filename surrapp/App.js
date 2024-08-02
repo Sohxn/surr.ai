@@ -23,7 +23,7 @@ SplashScreen.preventAutoHideAsync();
 const Bar = ({ height, color }) => {
   return (
     <StyledView
-      className={`w-[10px] m-[1px] rounded-full mr-2`}
+      className={`w-[5px] m-[1px] rounded-full mr-2`} 
       style={{ height: height, backgroundColor: color }}
     />
   );
@@ -74,7 +74,7 @@ export default function App() {
       channels: 1,
       bitsPerSample: 16,
       audioSource: 9,     // mic input
-      bufferSize: 88100
+      bufferSize: 512
     })
   }
 
@@ -203,8 +203,8 @@ export default function App() {
         </StyledView>
 
 
-        <StyledView className='h-[10vh] w-[97vw] rounded-2xl mt-[15vh]'>
-          <StyledView className='flex-row items-center'>
+        <StyledView className='h-[40vh] w-[97vw] rounded-2xl mt-[15vh] border-2'>
+          <StyledView className='flex-row items-center flex-row-reverse'>
             {bars.map((bar, index) => (
               <Bar key={index} height={bar.height} color={bar.color} />
             ))}
